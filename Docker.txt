@@ -1,0 +1,153 @@
+1. yum install docker -y      -----install docker on server.
+2.  service docker start      ----to start docker service
+    service docker stop       ----to stop docker service
+    service docker status     ----to check docker service status
+3. docker images              -----to check images available on local machine
+4. docker search ubantu       -----to search docker image on docker hub.
+5. docker pull ubuntu         -----to download image from docker hub to local
+6. docker run -it --name container1 ubuntu:latest        ----to create container using image
+   docker run -td --name container1 ubuntu:latest         ----to create but not enter inside
+7.  docker start container1     ----to start container
+    docker stop container1       ----to stop container
+    docker ps -a                ----to see all container
+    docker ps                   ----to see running container
+8.  docker start container2           ----to run container in background
+9.  docker exec -it container2 /bin/bash    -----to open existing conatiner
+10. docker attach container2                -----to go inside container
+10. press ctrl+p then ctrl+q        ----to ext from container without stopping container
+11. docker rm container2            ----to delete the container.
+12 docker rmi IMAGE1 IMAGE2 IMAGE3    -----to remove image
+13. docker stats container2           -----to check container resources
+14. docker tag <image_id> <image_name>:<tag>     -----to give image name and tag to existing image
+15. docker commit container8 my_image:version2     -----to give image name and tag while creating image
+16. docker build -t newimage .           -----to create image from dockerfile
+
+17.  docker run -it --name sspcont2 --privileged=true --volumes-from sspcont ubuntu    -----share volume between two container
+
+18. docker run -it --name cont15 -v /volume2 ubuntu       -----to create volume
+19. docker run -it --name hostcont18 -v /root/suraj:/Hostshre --privileged=true ubuntu    -----create host to container volume share.
+20. docker container inspect volcont3   ----to get all information about docker container
+21. docker run -it --name tech1 -p 555:80 ubuntu
+
+  
+Commands for volume-:
+1. docker volume create newvolume1   ----create docker volume 
+2. docker volume ls                  ----list of volumes avialble
+3. docker volume rm <volumename>     ----remove volume
+4. docker volume prune               ----remove all volumes
+5. docker run -it -d --name <cont_nmae> --mount source=newdir,target=/newapps ubuntu      -----to monut volume to container using mount flag.
+6. docker run -it -d --name volcont4 -v newvol:/apps ubuntu                               -----to mount volume using volume flag
+7. docker run -it -d --name <cont_nmae> --mount source=newdir,target=/newapps,readonly ubuntu       -----to mount volume to container using mount flag but read only permissions
+
+command to to mount bind mount-:
+1. docker run -it -d --name bindcont --mount type=bind,source=/root/suraj,target=/apps ubuntu   ----to mount bind mount  
+2. docker run -it -d --name bindcont --mount type=bind,source=/root/suraj,target=/apps,readonly ubuntu   ----to mount bind volume with read only permission.
+
+command to mount tmpfs mount-:
+1. docker run -it -d --name tmpfscont1 --mount type=tmpfs,target=/apps ubuntu   ----to mount tmpfs using monut flag 
+2. docker run -it -d --name tmpfscont2 --tmpfs /apps ubuntu                  ----to monu tmpfs using tmpfs flag
+
+
+Commands for network-:
+bridge network-:
+1. docker network create --driver bridge suraj   ----create bridge network
+2. docker network ls  ----list all network
+3. docker network rm <network name>    -----delete network
+4. docker network disconnect <network_name> <container_name>   ------disconnect container from network 
+5. docker network connect <network_name> <container_name>   ------connect container to network 
+6. docker network inspect network_name    ----to check network details
+7.  docker run -it -d --network suraj --name my_cont2 ubuntu    ---create container on creadted bridge network.
+
+Host network-:
+1.docker run -it -d --network host --name myhost nginx:latest   ---create container on host network
+2.                                                                                 
+
+Overlay network-:
+1.docker network create --driver overlay <network-name>  ---cretae overlay network
+
+None network-:
+1. docker network create --driver=bridge --attachable=false <network_name>    ---create none network
+
+Docker Swarm-:
+1. docker swarm init --advertise-addr <ip addr of manger node>    ----to initialized docker swarm (run on manger node)
+2. once run above command you will get one token just copy and run on worker node it will join to swarm manger node.
+Note-: while using docker swarm port 2377 should be opened.
+3. docker swarm join-token worker      ----to get token for worker node to join swarm
+4. docker swarm join-token manager     -----to get token to add manger node to swarm
+4.docker node ls                      ----to check nodes on docker swarm (run on manger node)
+5. docker swarm leave                 -----to leave docker worker node from docker swarm
+6.  docker swarm leave --force        ------leave docker manger from swarm forcefully
+7.  docker service create --name fun --replicas 3 -p 80:80 httpd     ----start docker service for docker swarm
+8. docker service ps fun     ---- to check running container for service on which node
+9. docker service inspect <service name>   ----to check service details
+10. docker service rm fun                  ----to remove the service
+11. docker stack deploy -c docker-compose.yml fun   ---- deploy service on docker swarm using docker compose file
+12. docker service scale <service_name>=3          ----to scale up or down the service (to scale up no of replicas)
+13. docker stack services fun        ----running services in a stack
+14. docker node update --availability drain <node_id>  ---to drain the node (to put node into maintaince mode so no any container should run)
+15. docker node update --availability active <node_id>    ----to exit from drain
+16. docker node update --label-add  <key>=<value> <node_id>      ----to add label to node
+17. docker service create --name <service-name> --constraint 'node.labels.<key> == <value>' <image-name>
+ ----to run container on specefic nodes using label
+18. docker service update --image <target_image> <service_id>   ----update the service image 
+19. docker stack ls       ---check stack list
+20. docker stack rm <stack_name>  ---to remove stack 
+21. docker service update --network-add <network_name> <service_name>   ---update network for service
+22. docker service update --network-rm <network_name> <service_name>     ----remove network from service
+
+echo -n "frescoPass@123" | docker secret create redis_password -           ---to create docker secreat
+docker secret ls   ---to check docker secreates
+
+There are two main modes for deploying services in Docker Swarm:
+
+Replicated Mode (default):
+
+In replicated mode, you specify the desired number of replicas for the service. Docker Swarm will then schedule and maintain the specified number of tasks (containers) across the Swarm nodes.
+
+Use --mode replicated to specify replicated mode.
+
+Example:
+
+bash
+Copy code
+docker service create --name my-service --replicas 3 my-image
+Global Mode:
+
+In global mode, Docker Swarm creates one task (container) for the service on each node in the Swarm cluster. This mode is useful for services that you want to run on every node in the cluster.
+
+Use --mode global to specify global mode.
+
+Example:
+
+bash
+Copy code
+docker service create --name my-service --mode global my-image
+To update the mode of an existing service, you can use the docker service update command:
+
+bash
+Copy code
+docker service update --mode <mode> <service_name>
+Replace <mode> with either replicated or global, and <service_name> with the name of the service you want to update.
+
+
+ 
+    
+ 
+
+
+
+
+
+For mysql-: 
+docker run --name mysqlDB -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=mydata -d mysql:latest    ---create mysql container
+docker exec -it mysqlDB mysql -uroot -proot       ---access mysql container                                   
+
+
+
+ 
+172.18.0.2    i
+
+172.18.0.3    my_cont2
+
+docker network disconnect suraj sample
+ 
